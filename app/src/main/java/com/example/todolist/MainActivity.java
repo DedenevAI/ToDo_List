@@ -1,7 +1,10 @@
 package com.example.todolist;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
@@ -20,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerViewNotes;
     private FloatingActionButton buttonAddNote;
     private DataBase dataBase = DataBase.getInstance();
+    private NotesAdapter notesAdapter;
 
 
     @Override
@@ -27,6 +31,36 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
+
+        notesAdapter = new NotesAdapter();
+        notesAdapter.setOnNoteClickListener(new NotesAdapter.OnNoteClickListener() {
+            @Override
+            public void noteClick(Note note) {
+            }
+        });
+        recyclerViewNotes.setAdapter(notesAdapter);
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
+                new ItemTouchHelper.SimpleCallback(0,
+                        ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
+                    @Override
+                    public boolean onMove(@NonNull RecyclerView recyclerView,
+                                          @NonNull RecyclerView.ViewHolder viewHolder,
+                                          @NonNull RecyclerView.ViewHolder target) {
+                        return false;
+                    }
+
+                    @Override
+                    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder,
+                                         int direction) {
+                        int position = viewHolder.getAdapterPosition();
+                        Note note = notesAdapter.getNotes().get(position);
+                        dataBase.remove(note.getId());
+                        showNotes();
+                    }
+                });
+        itemTouchHelper.attachToRecyclerView(recyclerViewNotes);
+
         buttonAddNote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -47,38 +81,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showNotes() {
-        linearLayoutNotes.removeAllViews();
-        for (Note note : dataBase.getStorage()) {
-            View view = getLayoutInflater().inflate(R.layout.note_item,
-                    linearLayoutNotes,
-                    false);
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dataBase.remove(note.getId());
-                    showNotes();
-                }
-            });
-            TextView textViewNote = view.findViewById(R.id.textViewNote);
-            textViewNote.setText(note.getText());
-
-            int colorId;
-            switch (note.getPriority()) {
-                case 0:
-                    colorId = android.R.color.holo_green_light;
-                    break;
-                case 1:
-                    colorId = android.R.color.holo_orange_light;
-                    break;
-                default:
-                    colorId = android.R.color.holo_red_light;
-            }
-
-            int color = ContextCompat.getColor(this, colorId);
-
-            textViewNote.setBackgroundColor(color);
-
-            linearLayoutNotes.addView(view);
-        }
+        notesAdapter.setNotes(dataBase.getStorage());
     }
 }
