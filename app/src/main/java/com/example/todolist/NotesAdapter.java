@@ -64,7 +64,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             @Override
             public void onClick(View v) {
                 if (onNoteClickListener != null) {
-                    onNoteClickListener.noteClick(note);
+
                 }
             }
         });
