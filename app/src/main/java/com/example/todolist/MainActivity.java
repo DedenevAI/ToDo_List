@@ -22,7 +22,7 @@ import java.util.Random;
 public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerViewNotes;
     private FloatingActionButton buttonAddNote;
-    private DataBase dataBase = DataBase.getInstance();
+    private NoteDataBase noteDataBase;
     private NotesAdapter notesAdapter;
 
 
@@ -30,7 +30,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        noteDataBase = NoteDataBase.getInstance(getApplication());
         initViews();
+
 
         notesAdapter = new NotesAdapter();
         notesAdapter.setOnNoteClickListener(new NotesAdapter.OnNoteClickListener() {
@@ -55,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
                                          int direction) {
                         int position = viewHolder.getAdapterPosition();
                         Note note = notesAdapter.getNotes().get(position);
-                        dataBase.remove(note.getId());
+                        noteDataBase.notesDao().remove(note.getId());
                         showNotes();
                     }
                 });
@@ -81,6 +84,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showNotes() {
-        notesAdapter.setNotes(dataBase.getStorage());
+        notesAdapter.setNotes(noteDataBase.notesDao().getNotes());
     }
 }

@@ -1,7 +1,5 @@
 package com.example.todolist;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,18 +9,23 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 public class MakeNoteActivity extends AppCompatActivity {
     private EditText editTextEnterNote;
     private RadioButton radioButtonLow;
     private RadioButton radioButtonMedium;
     private Button buttonSaveNote;
-    private DataBase database = DataBase.getInstance();
+    private NoteDataBase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_make_note);
+
+        database = NoteDataBase.getInstance(getApplication());
         initViews();
+
 
         buttonSaveNote.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -47,9 +50,8 @@ public class MakeNoteActivity extends AppCompatActivity {
         } else {
             String text = editTextEnterNote.getText().toString().trim();
             int priority = getPriority();
-            int id = database.getStorage().size();
-            Note note = new Note(id,text,priority);
-            database.add(note);
+            Note note = new Note(text,priority);
+            database.notesDao().add(note);
 
             finish();
         }
