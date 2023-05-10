@@ -29,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
 
         initViews();
 
-
         notesAdapter = new NotesAdapter();
         recyclerViewNotes.setAdapter(notesAdapter);
 
