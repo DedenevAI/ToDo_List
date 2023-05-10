@@ -9,10 +9,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.functions.Action;
+import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class MakeNoteViewModel extends AndroidViewModel {
@@ -26,25 +26,22 @@ public class MakeNoteViewModel extends AndroidViewModel {
     }
 
     public void saveNote(Note note) {
-        Disposable disposable = saveNoteRx(note)
+        Disposable disposable = notesDao.add(note)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action() {
                     @Override
                     public void run() throws Throwable {
-                        Log.d("MakeNoteViewModel", "sub");
+                        Log.d("MakeNoteViewModel", "saveNote");
                         shouldCloseScreen.setValue(true);
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Throwable {
+                        Log.d("MakeNoteViewModel", "error saveNote");
                     }
                 });
         compositeDisposable.add(disposable);
-    }
-    private Completable saveNoteRx(Note note){
-        return Completable.fromAction(new Action() {
-            @Override
-            public void run() throws Throwable {
-                notesDao.add(note);
-            }
-        });
     }
 
     @Override
